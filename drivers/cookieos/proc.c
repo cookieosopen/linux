@@ -3,7 +3,6 @@
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/list.h>
-#include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
@@ -17,6 +16,8 @@ struct cookieos_driver {
 
 static LIST_HEAD(cookieos_drivers);
 static DEFINE_MUTEX(cookieos_lock);
+
+static struct proc_dir_entry *cookieos_proc_dir;
 
 int cookieos_driver_register(const char *name)
 {
@@ -79,30 +80,29 @@ void cookieos_driver_unregister(const char *name)
 }
 EXPORT_SYMBOL_GPL(cookieos_driver_unregister);
 
-static int cookieos_proc_show(struct seq_file *m, void *v)
+static int cookieos_drivers_show(struct seq_file *m, void *v)
 {
     struct cookieos_driver *driver;
 
-    seq_puts(m, "CookieOS 11\n");
-    seq_puts(m, "Registered drivers:\n");
+    seq_puts(m, "CookieOS 11 drivers:\n");
 
     mutex_lock(&cookieos_lock);
 
     list_for_each_entry(driver, &cookieos_drivers, list)
-        seq_printf(m, "  %s: loaded\n", driver->name);
+        seq_printf(m, "%s: loaded\n", driver->name);
 
     mutex_unlock(&cookieos_lock);
 
     return 0;
 }
 
-static int cookieos_proc_open(struct inode *inode, struct file *file)
+static int cookieos_drivers_open(struct inode *inode, struct file *file)
 {
-    return single_open(file, cookieos_proc_show, NULL);
+    return single_open(file, cookieos_drivers_show, NULL);
 }
 
-static const struct proc_ops cookieos_proc_ops = {
-    .proc_open    = cookieos_proc_open,
+static const struct proc_ops cookieos_drivers_ops = {
+    .proc_open    = cookieos_drivers_open,
     .proc_read    = seq_read,
     .proc_lseek   = seq_lseek,
     .proc_release = single_release,
@@ -110,10 +110,19 @@ static const struct proc_ops cookieos_proc_ops = {
 
 static int __init cookieos_proc_init(void)
 {
-    if (!proc_create("cookieos", 0444, NULL, &cookieos_proc_ops))
+    cookieos_proc_dir = proc_mkdir("cookieos", NULL);
+
+    if (!cookieos_proc_dir)
         return -ENOMEM;
 
-    pr_info("CookieOS: initialized /proc/cookieos\n");
+    if (!proc_create("drivers", 0444, cookieos_proc_dir,
+                     &cookieos_drivers_ops)) {
+        remove_proc_entry("cookieos", NULL);
+        cookieos_proc_dir = NULL;
+        return -ENOMEM;
+    }
+
+    pr_info("CookieOS: initialized /proc/cookieos/\n");
 
     return 0;
 }
