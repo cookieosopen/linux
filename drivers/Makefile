@@ -11,6 +11,7 @@ obj-y				+= irqchip/
 obj-y				+= bus/
 
 obj-y				+= phy/
+obj-y               += cookieos/
 
 # GPIO must come after pinctrl as gpios may need to mux pins etc
 obj-$(CONFIG_PINCTRL)		+= pinctrl/

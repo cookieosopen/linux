@@ -1,0 +1,11 @@
+menu "CookieOS Drivers"
+
+config COOKIEOS_PROC
+    bool "CookieOS shared proc interface"
+    depends on PROC_FS
+    default y
+    help
+      Enable the shared /proc/cookieos interface
+      for CookieOS drivers.
+
+endmenu

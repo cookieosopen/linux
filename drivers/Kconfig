@@ -10,6 +10,8 @@ source "drivers/cxl/Kconfig"
 source "drivers/pcmcia/Kconfig"
 source "drivers/rapidio/Kconfig"
 
+source "drivers/cookieos/Kconfig"
+
 config PC104
 	bool "PC/104 support" if EXPERT
 	help
