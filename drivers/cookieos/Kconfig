@@ -8,4 +8,7 @@ config COOKIEOS_PROC
       Enable the shared /proc/cookieos interface
       for CookieOS drivers.
 
+comment "Modular Technology configuration"
+source "drivers/cookieos/mt/Kconfig"
+
 endmenu

@@ -1,0 +1,9 @@
+menu "CookieOS MT specific drivers"
+
+config MT_MTCORE
+    tristate "MtCore"
+    default m
+    help
+      MtCore.
+
+endmenu
